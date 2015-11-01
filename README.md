@@ -1,0 +1,1 @@
+Hello team, this repository currently contains an example from the OpenCV Android SDK, "tutorial-1-camerapreview". If you successfully build it, you should see a camera preview with the FPS and image dimensions in the upper left corner. 
