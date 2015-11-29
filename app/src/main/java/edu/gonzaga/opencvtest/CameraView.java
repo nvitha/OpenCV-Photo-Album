@@ -80,11 +80,31 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         // The camera preview was automatically stopped. Start it again.
         mCamera.startPreview();
         mCamera.setPreviewCallback(this);
-
-        //stats
-
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-        /*
+
+        //These are the key functions for color and shape data
+        //TODO: Make these functions non-void and store their values in DBMS
+        getStatistics(image);
+        edgeDetection(image);
+        circleDetection(image);
+
+        //TODO: Successful picture taking should return user to ViewAlbum activity
+
+        // Write the image in a file (in jpeg format)
+        try {
+            FileOutputStream fos = new FileOutputStream(mPictureFileName);
+
+            fos.write(data);
+            fos.close();
+
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+
+    }
+
+    //@post: print mean, stdev of RGB and HSV (SLOW)
+    public void getStatistics(Mat image) {
         //H: 0-180; S, V: 0-255
         Mat hsvImage = new Mat();
         Imgproc.cvtColor(image, hsvImage, Imgproc.COLOR_BGR2HSV);
@@ -115,9 +135,11 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
 
         System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
-        */
-        Mat src = image;
-        /*
+
+    }
+
+    //@post: print R, theta (polar coordinates descriptions) of each line in image
+    public void edgeDetection(Mat src) {
         Mat dst = new Mat();
         Mat cdst = new Mat();
 
@@ -138,8 +160,11 @@ public class CameraView extends JavaCameraView implements PictureCallback {
                 System.out.println("Rtheta: " + Arrays.toString(rTheta));
             }
         }
-        */
 
+    }
+
+    //@post: print Xcenter, Ycenter, radius of each circle
+    public void circleDetection(Mat src) {
         Mat src_gray = new Mat();
         Imgproc.cvtColor(src, src_gray, Imgproc.COLOR_BGR2GRAY);
 
@@ -160,17 +185,6 @@ public class CameraView extends JavaCameraView implements PictureCallback {
                 System.out.println("---X,Y,Radius: " + Arrays.toString(circles.get(0, col)));
             }
         }
-
-        // Write the image in a file (in jpeg format)
-        try {
-            FileOutputStream fos = new FileOutputStream(mPictureFileName);
-
-            fos.write(data);
-            fos.close();
-
-        } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
-        }
-
     }
+
 }

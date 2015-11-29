@@ -119,10 +119,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
     //can return inputFrame.rgba() for color, .gray() for grayscale
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         Mat src = inputFrame.rgba();
-
-
-
-
 //        return inputFrame.rgba();
 ////        return inputFrame.gray();
         return inputFrame.rgba();

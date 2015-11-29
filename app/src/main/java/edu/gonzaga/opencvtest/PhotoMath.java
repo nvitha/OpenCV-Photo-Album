@@ -3,7 +3,7 @@ package edu.gonzaga.opencvtest;
 import java.util.ArrayList;
 
 /**
- * Created by user on 11/28/15.
+ * Static functions for getting mean, stdev of a List of pixels
  */
 public class PhotoMath {
 
