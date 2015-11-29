@@ -3,6 +3,8 @@
 package edu.gonzaga.opencvtest;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -116,24 +118,15 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
     //can return inputFrame.rgba() for color, .gray() for grayscale
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         //        //get color data from each pixel
-//        Mat image = inputFrame.rgba();
-////        mOpenCvCameraView.
-//
-////        for (int row = 0; row < image.rows(); row++) {
-////            for (int col = 0; col < image.cols(); col++) {
-////                for (int c = 0; c < 3; c++) {
-////                    //info hold BGRA info at position
-////                    double[] info = image.get(row, col);
-//////                    System.out.println(Arrays.toString(info));
-////                }
-////            }
-////        }
-//
+/*
+
+*/
 //        return inputFrame.rgba();
 ////        inputFrame.rgba().
 ////        return inputFrame.gray();
         return inputFrame.rgba();
     }
+    //TODO; Handle exception on taking multiple photos consecutively
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
