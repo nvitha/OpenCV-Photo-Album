@@ -16,6 +16,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.MatOfByte;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.hardware.Camera.Size;
@@ -117,12 +118,12 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
     //onCameraFrame called per CvCameraViewListener2
     //can return inputFrame.rgba() for color, .gray() for grayscale
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        //        //get color data from each pixel
-/*
+        Mat src = inputFrame.rgba();
 
-*/
+
+
+
 //        return inputFrame.rgba();
-////        inputFrame.rgba().
 ////        return inputFrame.gray();
         return inputFrame.rgba();
     }

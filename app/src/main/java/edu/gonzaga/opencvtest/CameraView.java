@@ -81,9 +81,9 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         mCamera.setPreviewCallback(this);
 
         //stats
-//        Mat m = new Mat()
-//        MatOfByte m = new MatOfByte(data);
+
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+        /*
         //H: 0-180; S, V: 0-255
         Mat hsvImage = new Mat();
         Imgproc.cvtColor(image, hsvImage, Imgproc.COLOR_BGR2HSV);
@@ -114,7 +114,29 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
 
         System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
+        */
+        Mat src = image;
+        Mat dst = new Mat();
+        Mat cdst = new Mat();
 
+        //Detect edges with canny detector, then convert into BGR (50, 200 are threshholds)
+        Imgproc.Canny(src, dst, 50, 200);
+//        Imgproc.cvtColor(dst, cdst, Imgproc.COLOR_GRAY2BGR);
+
+        Mat lines = new Mat();
+        double rho = 1;
+        double theta = Math.PI/180;
+        double minTheta = theta/2;
+        double maxTheta = theta*2;
+        Imgproc.HoughLines(dst, lines, rho, theta, 100, 0, 0, minTheta, maxTheta );
+        //rows = numLines; cols == 1 iff > 0 lines
+        System.out.println(lines.rows() + " --- " + lines.cols());
+        if (lines.cols() == 1) {
+            for (int row = 0; row < lines.rows(); row++) {
+                double[] rTheta = lines.get(row, 0);
+                System.out.println("Rtheta: " + Arrays.toString(rTheta));
+            }
+        }
         // Write the image in a file (in jpeg format)
         try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
