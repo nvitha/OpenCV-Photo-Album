@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.opencv.android.JavaCameraView;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -14,7 +15,7 @@ import org.opencv.imgproc.Imgproc;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.Size;
+//import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -47,18 +48,18 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         mCamera.setParameters(params);
     }
 
-    public List<Size> getResolutionList() {
+    public List<android.hardware.Camera.Size> getResolutionList() {
         return mCamera.getParameters().getSupportedPreviewSizes();
     }
 
-    public void setResolution(Size resolution) {
+    public void setResolution(android.hardware.Camera.Size resolution) {
         disconnectCamera();
         mMaxHeight = resolution.height;
         mMaxWidth = resolution.width;
         connectCamera(getWidth(), getHeight());
     }
 
-    public Size getResolution() {
+    public android.hardware.Camera.Size getResolution() {
         return mCamera.getParameters().getPreviewSize();
     }
 
@@ -116,13 +117,13 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
         */
         Mat src = image;
+        /*
         Mat dst = new Mat();
         Mat cdst = new Mat();
 
         //Detect edges with canny detector, then convert into BGR (50, 200 are threshholds)
         Imgproc.Canny(src, dst, 50, 200);
 //        Imgproc.cvtColor(dst, cdst, Imgproc.COLOR_GRAY2BGR);
-
         Mat lines = new Mat();
         double rho = 1;
         double theta = Math.PI/180;
@@ -137,6 +138,29 @@ public class CameraView extends JavaCameraView implements PictureCallback {
                 System.out.println("Rtheta: " + Arrays.toString(rTheta));
             }
         }
+        */
+
+        Mat src_gray = new Mat();
+        Imgproc.cvtColor(src, src_gray, Imgproc.COLOR_BGR2GRAY);
+
+        //The tutorial uses a Gaussian Blur to lower noise, but this led to ignoring obvious circles
+//            Imgproc.GaussianBlur(src_gray, src_gray, new org.opencv.core.Size(9, 9), 2, 2 );
+
+        Mat circles = new Mat();
+
+        //TODO; Hough transform params are finicky; fiddle with these until they work
+        double minDistCenters = src_gray.rows() / 16;
+        double edgeUpperThreshold = 500;
+        double centerDetectionThreshold = 50;
+        Imgproc.HoughCircles(src_gray, circles, Imgproc.HOUGH_GRADIENT, 1,
+                minDistCenters, edgeUpperThreshold, centerDetectionThreshold, 0, 0);
+        System.out.println(circles.rows() + " --- " + circles.cols());
+        if (circles.rows() == 1) {
+            for (int col = 0; col < circles.cols(); col++) {
+                System.out.println("---X,Y,Radius: " + Arrays.toString(circles.get(0, col)));
+            }
+        }
+
         // Write the image in a file (in jpeg format)
         try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
