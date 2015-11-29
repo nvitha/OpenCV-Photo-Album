@@ -9,6 +9,7 @@ import org.opencv.android.JavaCameraView;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -83,26 +84,37 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 //        Mat m = new Mat()
 //        MatOfByte m = new MatOfByte(data);
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+        //H: 0-180; S, V: 0-255
+        Mat hsvImage = new Mat();
+        Imgproc.cvtColor(image, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-//        Mat image = inputFrame.rgba();
-//        mOpenCvCameraView.
         ArrayList<Double[]> bgrPixels = new ArrayList<>();
+        ArrayList<Double[]> hsvPixels = new ArrayList<>();
         for (int row = 0; row < image.rows(); row++) {
             for (int col = 0; col < image.cols(); col++) {
-//                for (int c = 0; c < 3; c++) {
-                //info hold BGR info at position
                 double[] bgr = image.get(row, col);
+                double[] hsv = hsvImage.get(row, col);
+
                 Double[] currentPixel = new Double[bgr.length];
+                Double[] currentPixelHSV = new Double[hsv.length];
+
                 for (int i = 0; i < bgr.length; i++) currentPixel[i] = new Double(bgr[i]);
+                for (int i = 0; i < hsv.length; i++) currentPixelHSV[i] = new Double(hsv[i]);
+
                 bgrPixels.add(currentPixel);
-//                    System.out.println(Arrays.toString(info));
-//                }
+                hsvPixels.add(currentPixelHSV);
             }
         }
+        //TODO: These mean/stdev calls are really slow (~30 seconds on Moto E)
+        // Optimize, or move to a different thread
         System.out.println("BGR Mean: " + Arrays.toString(PhotoMath.pixelMean(bgrPixels)) );
-        System.out.println("BGR STDEV: " + Arrays.toString(PhotoMath.pixelStdev(bgrPixels)) );
+        System.out.println("BGR STDEV: " + Arrays.toString(PhotoMath.pixelStdev(bgrPixels)));
 
-//        System.out.println(mat.rows() + " --- " + mat.cols());
+        System.out.println("HSV Mean: " + Arrays.toString(PhotoMath.pixelMean(hsvPixels)) );
+        System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
+
+        System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
+
         // Write the image in a file (in jpeg format)
         try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
