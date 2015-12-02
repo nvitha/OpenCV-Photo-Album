@@ -84,7 +84,7 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 
         //These are the key functions for color and shape data
         //TODO: Make these functions non-void and store their values in DBMS
-        getStatistics(image);
+//        getStatistics(image); //takes a while
         edgeDetection(image);
         circleDetection(image);
 
