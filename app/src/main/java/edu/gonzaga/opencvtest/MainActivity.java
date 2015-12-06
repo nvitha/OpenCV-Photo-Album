@@ -18,11 +18,15 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import android.database.sqlite.*;
+import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
+import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
 import edu.gonzaga.opencvtest.R;
 
 public class MainActivity extends Activity {
     private static final String TAG = "Main";
+    private SQLiteDatabase openCVdb = openOrCreateDatabase("OpenCV", 0, null);
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
     //TODO: Pass images to pictures from SQL query
@@ -146,4 +150,46 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    // Create SQLLite database connection for executing SQL queries
+    public void initializeSQLiteDB(){
+        openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table ColorStatistics(PhotoID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, AverageValue int NOT NULL, STDEV int NOT NULL, Check (AverageValue > 0 AND AverageValue < 361));");
+        openCVdb.execSQL("create table Shape(ShapeID int PRIMARY KEY NOT NULL, ShapeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table PhotoShape(PhotoID int NOT NULL, ShapeID int NOT NULL, Loc1 varchar(255) NOT NULL, Loc2 varchar(255) NOT NULL);");
+        openCVdb.execSQL("create view SingleColorView AS\n" +
+                "(select PhotoID, ColorSchemeName, ColorSchemeComponentName, AverageValue, STDEV\n" +
+                "from ColorSchemeComponent \n" +
+                "natural join ColorScheme \n" +
+                "natural join ColorStatistics\n" +
+                "order by PhotoID);");
+        openCVdb.execSQL("create view ColorView AS\n" +
+                "(select Photo.PhotoID PhotoID, Photo.FileLocation FileLocation, r.AverageValue Red, r.STDEV RedStdev, g.AverageValue Green, g.STDEV GreenStdev, b.AverageValue Blue, b.STDEV BlueStdev, h.AverageValueHue, h.STDEV HueStdev, s.AverageValue Saturation, s.STDEV SaturationStdev, s.AverageValue Value, v.STDEV ValueStdev\n" +
+                "from Photo\n" +
+                "join SingleColorView r on Photo.PhotoID=r.PhotoID\n" +
+                "join SingleColorView g on Photo.PhotoID=g.PhotoID\n" +
+                "join SingleColorView b on Photo.PhotoID=b.PhotoID\n" +
+                "join SingleColorView h on Photo.PhotoID=h.PhotoID\n" +
+                "join SingleColorView s on Photo.PhotoID=s.PhotoID\n" +
+                "join SingleColorView v on Photo.PhotoID=v.PhotoID\n" +
+                "having r.ColorSchemeComponentName = \"Red\"\n" +
+                "and g.ColorSchemeComponentName = \"Green\"\n" +
+                "and b.ColorSchemeComponentName = \"Blue\"\n" +
+                "and h.ColorSchemeComponentName = \"Hue\"\n" +
+                "and s.ColorSchemeComponentName = \"Saturation\"\n" +
+                "and v.ColorSchemeComponentName = \"Value\"\n" +
+                "order by Photo.PhotoID);");
+        openCVdb.execSQL("create view SingleShapeView as\n" +
+                "(select PhotoID, ShapeID, ShapeName, Count(*) Occurence\n" +
+                "from Shape \n" +
+                "natural join PhotoShape\n" +
+                "group by PhotoID, ShapeID\n" +
+                "order by PhotoID);");
+
+        // Execute create/insertion commands; Would be used for inserting statistics as well
+        openCVdb.execSQL("insert into ColorScheme values(1,RGB), (2,HSV);");
+        openCVdb.execSQL("insert into ColorSchemeComponent values (1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation), (2,6,Value);");
+        openCVdb.execSQL("insert into Shape values (1,Line), (2,Circle);");
+    }
 }
