@@ -19,12 +19,18 @@ import android.hardware.Camera.PictureCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import android.database.sqlite.*;
+import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
+import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
+
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 
 public class CameraView extends JavaCameraView implements PictureCallback {
 
     private static final String TAG = "CameraView";
     private String mPictureFileName;
+    private SQLiteDatabase.CursorFactory factory;
+    private SQLiteDatabase openCVdb = openOrCreateDatabase("OpenCV", factory, null);
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
