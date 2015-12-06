@@ -8,9 +8,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.database.sqlite.*;
+import android.widget.Spinner;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,6 +64,31 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 prevPhoto();
+            }
+        });
+
+        //Populate query spinner
+        Spinner spinner = (Spinner) findViewById(R.id.selectSpinner);
+        //TODO: Selecting item in adapter should trigger a query
+        //These are the query names
+        String[] vals = new String[] {"default",
+                "sort by average red",
+                "sort by average green",
+                "sort by average blue"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, vals);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        //set on click listener
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                System.out.println(pos);
+                //Should execute the query associated with pos and change the pictures ArrayList appropriately
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                //do nothing!
             }
         });
 
