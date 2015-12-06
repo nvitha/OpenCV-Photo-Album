@@ -1,7 +1,10 @@
 package edu.gonzaga.opencvtest;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.database.DatabaseErrorHandler;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -18,17 +21,23 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
-import android.database.sqlite.*;
+//import android.database.sqlite.*;
 import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
+import static android.database.sqlite.SQLiteDatabase.CursorFactory;
 
 import edu.gonzaga.opencvtest.R;
 
 public class MainActivity extends Activity {
     private static final String TAG = "Main";
-    private SQLiteDatabase openCVdb = openOrCreateDatabase("OpenCV", 0, null);
+    private SQLiteDatabase.CursorFactory factory;
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
+    private DatabaseErrorHandler dbHandler;
+    MainActivity instance = new MainActivity();
+    DBHelper DBhelp = new DBHelper(instance.getApplicationContext(),factory,dbHandler);
+    SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
     //TODO: Pass images to pictures from SQL query
 
     public MainActivity() {
@@ -42,6 +51,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         Button toSnap = (Button) findViewById(R.id.snapButton);
         final Activity main = this;
+        Context contextNew = this;
         toSnap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
