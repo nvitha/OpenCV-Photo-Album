@@ -13,11 +13,17 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import android.database.sqlite.*;
+import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
+import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 
@@ -25,6 +31,9 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 
     private static final String TAG = "CameraView";
     private String mPictureFileName;
+    private SQLiteDatabase.CursorFactory factory;
+    private DBHelper DBhelp = null;
+    private SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,8 +96,6 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 //        getStatistics(image); //takes a while
         edgeDetection(image);
         circleDetection(image);
-
-        //TODO: Successful picture taking should return user to ViewAlbum activity
 
         // Write the image in a file (in jpeg format)
         try {
@@ -187,4 +194,21 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         }
     }
 
+        // Execute retrieving commands (select); Would use these queries when a photo is tapped
+    public String[] selectColorStatistics(int myPhoto){
+        Cursor selectResults = openCVdb.rawQuery("Select * from ColorStatistics order by PhotoId;", null);
+        selectResults.moveToFirst();
+        String[] statistics = new String[4];
+        int photoId = selectResults.getColumnIndex("PhotoID");
+        while(photoId != myPhoto)
+        {
+            selectResults.moveToNext();
+            photoId = selectResults.getColumnIndex("PhotoID");
+        }
+        statistics[0] = Integer.toString(selectResults.getColumnIndex("PhotoID"));
+        statistics[1] = Integer.toString(selectResults.getColumnIndex("ColorSchemeComponentID"));
+        statistics[2] = selectResults.getString(2);
+        statistics[3] = selectResults.getString(3);
+        return statistics;
+    }
 }
