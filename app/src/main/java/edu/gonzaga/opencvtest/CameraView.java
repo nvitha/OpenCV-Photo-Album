@@ -88,8 +88,6 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         edgeDetection(image);
         circleDetection(image);
 
-        //TODO: Successful picture taking should return user to ViewAlbum activity
-
         // Write the image in a file (in jpeg format)
         try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
