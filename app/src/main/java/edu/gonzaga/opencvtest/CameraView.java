@@ -185,4 +185,21 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         }
     }
 
+        // Execute retrieving commands (select); Would use these queries when a photo is tapped
+    public String[] selectColorStatistics(int myPhoto){
+        Cursor selectResults = openCVdb.rawQuery("Select * from ColorStatistics order by PhotoId;", null);
+        selectResults.moveToFirst();
+        String[] statistics = new String[4];
+        int photoId = selectResults.getColumnIndex("PhotoID");
+        while(photoId != myPhoto)
+        {
+            selectResults.moveToNext();
+            photoId = selectResults.getColumnIndex("PhotoID");
+        }
+        statistics[0] = Integer.toString(selectResults.getColumnIndex("PhotoID"));
+        statistics[1] = Integer.toString(selectResults.getColumnIndex("ColorSchemeComponentID"));
+        statistics[2] = selectResults.getString(2);
+        statistics[3] = selectResults.getString(3);
+        return statistics;
+    }
 }
