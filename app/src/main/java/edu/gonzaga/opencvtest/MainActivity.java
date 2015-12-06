@@ -48,9 +48,8 @@ public class MainActivity extends Activity {
         });
 
 
-        // populate images
+        // populate images, set index to 0
         populatePicturesDefault();
-        //TODO: Populate pictures with results of SQL query
         //set listeners
         Button nextButton = (Button) findViewById(R.id.next);
         nextButton.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +83,9 @@ public class MainActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
                 System.out.println(pos);
+                //THIS IS WHERE YOU DECIDE WHAT QUERY TO EXECUTE
                 //Should execute the query associated with pos and change the pictures ArrayList appropriately
+                //Pictures should be populated with the results of the query, and currentIndex should reset to 1
             }
 
             @Override
