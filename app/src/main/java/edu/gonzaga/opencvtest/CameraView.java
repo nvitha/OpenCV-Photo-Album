@@ -19,12 +19,18 @@ import android.hardware.Camera.PictureCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import android.database.sqlite.*;
+import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
+import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
+
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 
 public class CameraView extends JavaCameraView implements PictureCallback {
 
     private static final String TAG = "CameraView";
     private String mPictureFileName;
+    private SQLiteDatabase.CursorFactory factory;
+    private SQLiteDatabase openCVdb = openOrCreateDatabase("OpenCV", factory, null);
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -185,4 +191,21 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         }
     }
 
+        // Execute retrieving commands (select); Would use these queries when a photo is tapped
+    public String[] selectColorStatistics(int myPhoto){
+        Cursor selectResults = openCVdb.rawQuery("Select * from ColorStatistics order by PhotoId;", null);
+        selectResults.moveToFirst();
+        String[] statistics = new String[4];
+        int photoId = selectResults.getColumnIndex("PhotoID");
+        while(photoId != myPhoto)
+        {
+            selectResults.moveToNext();
+            photoId = selectResults.getColumnIndex("PhotoID");
+        }
+        statistics[0] = Integer.toString(selectResults.getColumnIndex("PhotoID"));
+        statistics[1] = Integer.toString(selectResults.getColumnIndex("ColorSchemeComponentID"));
+        statistics[2] = selectResults.getString(2);
+        statistics[3] = selectResults.getString(3);
+        return statistics;
+    }
 }
