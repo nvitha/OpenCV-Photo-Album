@@ -222,4 +222,13 @@ public class MainActivity extends Activity {
         openCVdb.execSQL("insert into ColorSchemeComponent values (1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation), (2,6,Value);");
         openCVdb.execSQL("insert into Shape values (1,Line), (2,Circle);");
     }
+
+    public void toastTest(){
+        Context context = getApplicationContext();
+        CharSequence text = "";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
 }

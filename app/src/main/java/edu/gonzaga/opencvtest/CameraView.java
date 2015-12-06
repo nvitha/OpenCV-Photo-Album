@@ -14,6 +14,7 @@ import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.Size;
@@ -31,12 +32,24 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 
     private static final String TAG = "CameraView";
     private String mPictureFileName;
-    private SQLiteDatabase.CursorFactory factory;
-    private DBHelper DBhelp = null;
-    private SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
+    private SQLiteDatabase openCVdb;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        SQLiteDatabase.CursorFactory factory = new SQLiteDatabase.CursorFactory() {
+            @Override
+            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable, SQLiteQuery query) {
+                return null;
+            }
+        };
+        DatabaseErrorHandler dbHandler = new DatabaseErrorHandler() {
+            @Override
+            public void onCorruption(SQLiteDatabase dbObj) {
+
+            }
+        };
+        DBHelper DBhelp = new DBHelper(context,factory,dbHandler);
+        openCVdb = DBhelp.getWritableDatabase();
     }
 
     public List<String> getEffectList() {
