@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import android.widget.Toast;
 //import android.database.sqlite.*;
 import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
@@ -31,13 +33,10 @@ import edu.gonzaga.opencvtest.R;
 
 public class MainActivity extends Activity {
     private static final String TAG = "Main";
-    private SQLiteDatabase.CursorFactory factory;
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
-    private DatabaseErrorHandler dbHandler;
-    MainActivity instance = new MainActivity();
-    DBHelper DBhelp = new DBHelper(instance.getApplicationContext(),factory,dbHandler);
-    SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
+
+    //MainActivity instance = new MainActivity();
     //TODO: Pass images to pictures from SQL query
 
     public MainActivity() {
@@ -116,7 +115,9 @@ public class MainActivity extends Activity {
         currentPictureIndex = 0;
         String dirName = Environment.getExternalStorageDirectory().getPath();
         File dir = new File(dirName);
-
+        if(currentPictureIndex == 0){
+            return;
+        }
         for (File f : dir.listFiles()) {
             if (f.toString().endsWith(".jpg")) pictures.add(f);
         }
@@ -130,6 +131,9 @@ public class MainActivity extends Activity {
 
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
+        if(currentPictureIndex == 0){
+            return;
+        }
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
         updateShownIndex();
@@ -162,6 +166,22 @@ public class MainActivity extends Activity {
 
     // Create SQLLite database connection for executing SQL queries
     public void initializeSQLiteDB(){
+        SQLiteDatabase.CursorFactory factory = new CursorFactory() {
+            @Override
+            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable, SQLiteQuery query) {
+                return null;
+            }
+        };
+        DatabaseErrorHandler dbHandler = new DatabaseErrorHandler() {
+            @Override
+            public void onCorruption(SQLiteDatabase dbObj) {
+
+            }
+        };
+        DBHelper DBhelp = new DBHelper(this.getApplicationContext(),factory,dbHandler);
+        SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
+
+
         openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
         openCVdb.execSQL("create table ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
         openCVdb.execSQL("create table ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
