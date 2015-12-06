@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.database.sqlite.*;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class MainActivity extends Activity {
         Spinner spinner = (Spinner) findViewById(R.id.selectSpinner);
         //TODO: Selecting item in adapter should trigger a query
         //These are the query names
-        String[] vals = new String[] {"default",
+        String[] vals = new String[] {"default ordering",
                 "sort by average red",
                 "sort by average green",
                 "sort by average blue"};
@@ -106,10 +107,17 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void updateShownIndex() {
+        TextView ind = (TextView) findViewById(R.id.picIndex);
+        String val = (currentPictureIndex+1) + " / " + pictures.size();
+        ind.setText(val);
+    }
+
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
+        updateShownIndex();
     }
 
     public void nextPhoto() {
