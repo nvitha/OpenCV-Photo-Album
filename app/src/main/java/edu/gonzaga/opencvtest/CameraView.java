@@ -1,8 +1,10 @@
 package edu.gonzaga.opencvtest;
 
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.opencv.android.JavaCameraView;
@@ -15,23 +17,24 @@ import org.opencv.imgproc.Imgproc;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.Size;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import android.database.sqlite.*;
 import static android.database.sqlite.SQLiteDatabase.CREATE_IF_NECESSARY;
-import static android.database.sqlite.SQLiteDatabase.openDatabase;
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 
 public class CameraView extends JavaCameraView implements PictureCallback {
-
     private static final String TAG = "CameraView";
     private String mPictureFileName;
+    private SQLiteDatabase.CursorFactory factory;
     private SQLiteDatabase openCVdb;
 
     public CameraView(Context context, AttributeSet attrs) {
@@ -105,8 +108,7 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
 
         //These are the key functions for color and shape data
-        //TODO: Make these functions non-void and store their values in DBMS
-//        getStatistics(image); //takes a while
+        getStatistics(image);
         edgeDetection(image);
         circleDetection(image);
 
@@ -116,13 +118,9 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 
             fos.write(data);
             fos.close();
-
         } catch (java.io.IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
-
-
-
     }
 
     //@post: print mean, stdev of RGB and HSV (SLOW)
@@ -148,16 +146,21 @@ public class CameraView extends JavaCameraView implements PictureCallback {
                 hsvPixels.add(currentPixelHSV);
             }
         }
-        //TODO: These mean/stdev calls are really slow (~30 seconds on Moto E)
-        // Optimize, or move to a different thread
+
         System.out.println("BGR Mean: " + Arrays.toString(PhotoMath.pixelMean(bgrPixels)) );
         System.out.println("BGR STDEV: " + Arrays.toString(PhotoMath.pixelStdev(bgrPixels)));
 
-        System.out.println("HSV Mean: " + Arrays.toString(PhotoMath.pixelMean(hsvPixels)) );
+        System.out.println("HSV Mean: " + Arrays.toString(PhotoMath.pixelMean(hsvPixels)));
         System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
 
-        System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 1, " + PhotoMath.pixelMean(bgrPixels)[2] + ", " + PhotoMath.pixelStdev(bgrPixels)[2] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 2, " + PhotoMath.pixelMean(bgrPixels)[1] + ", " + PhotoMath.pixelStdev(bgrPixels)[1] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 3, " + PhotoMath.pixelMean(bgrPixels)[0] + ", " + PhotoMath.pixelStdev(bgrPixels)[0] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 4, " + PhotoMath.pixelMean(hsvPixels)[0] + ", " + PhotoMath.pixelStdev(hsvPixels)[0] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 5, " + PhotoMath.pixelMean(hsvPixels)[1] + ", " + PhotoMath.pixelStdev(hsvPixels)[1] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 6, " + PhotoMath.pixelMean(hsvPixels)[2] + ", " + PhotoMath.pixelStdev(hsvPixels)[2] + ");");
 
+        System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
     }
 
     //@post: print R, theta (polar coordinates descriptions) of each line in image
@@ -173,16 +176,16 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         double theta = Math.PI/180;
         double minTheta = theta/2;
         double maxTheta = theta*2;
-        Imgproc.HoughLines(dst, lines, rho, theta, 100, 0, 0, minTheta, maxTheta );
+        Imgproc.HoughLines(dst, lines, rho, theta, 100, 0, 0, minTheta, maxTheta);
         //rows = numLines; cols == 1 iff > 0 lines
         System.out.println(lines.rows() + " --- " + lines.cols());
         if (lines.cols() == 1) {
             for (int row = 0; row < lines.rows(); row++) {
                 double[] rTheta = lines.get(row, 0);
                 System.out.println("Rtheta: " + Arrays.toString(rTheta));
+                openCVdb.execSQL("insert into PhotoShape values(" + src + ", 1, " + rTheta[0] + ", " + rTheta[1] + ");");
             }
         }
-
     }
 
     //@post: print Xcenter, Ycenter, radius of each circle
@@ -194,8 +197,6 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 //            Imgproc.GaussianBlur(src_gray, src_gray, new org.opencv.core.Size(9, 9), 2, 2 );
 
         Mat circles = new Mat();
-
-        //TODO; Hough transform params are finicky; fiddle with these until they work
         double minDistCenters = src_gray.rows() / 16;
         double edgeUpperThreshold = 500;
         double centerDetectionThreshold = 50;
@@ -205,25 +206,8 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         if (circles.rows() == 1) {
             for (int col = 0; col < circles.cols(); col++) {
                 System.out.println("---X,Y,Radius: " + Arrays.toString(circles.get(0, col)));
+                openCVdb.execSQL("insert into PhotoShape values(" + src + ", 2, " + circles.get(0, col)[0] + ", " + circles.get(0, col)[2] + ");");
             }
         }
-    }
-
-        // Execute retrieving commands (select); Would use these queries when a photo is tapped
-    public String[] selectColorStatistics(int myPhoto){
-        Cursor selectResults = openCVdb.rawQuery("Select * from ColorStatistics order by PhotoId;", null);
-        selectResults.moveToFirst();
-        String[] statistics = new String[4];
-        int photoId = selectResults.getColumnIndex("PhotoID");
-        while(photoId != myPhoto)
-        {
-            selectResults.moveToNext();
-            photoId = selectResults.getColumnIndex("PhotoID");
-        }
-        statistics[0] = Integer.toString(selectResults.getColumnIndex("PhotoID"));
-        statistics[1] = Integer.toString(selectResults.getColumnIndex("ColorSchemeComponentID"));
-        statistics[2] = selectResults.getString(2);
-        statistics[3] = selectResults.getString(3);
-        return statistics;
     }
 }
