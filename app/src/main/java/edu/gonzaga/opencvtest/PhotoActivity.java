@@ -19,6 +19,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgproc.Imgproc;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera.Size;
@@ -183,6 +184,7 @@ public class PhotoActivity extends Activity implements CvCameraViewListener2, On
         return true;
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         Log.i(TAG,"onTouch event");

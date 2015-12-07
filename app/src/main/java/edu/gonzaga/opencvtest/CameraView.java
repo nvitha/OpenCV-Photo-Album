@@ -121,6 +121,8 @@ public class CameraView extends JavaCameraView implements PictureCallback {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
 
+
+
     }
 
     //@post: print mean, stdev of RGB and HSV (SLOW)
