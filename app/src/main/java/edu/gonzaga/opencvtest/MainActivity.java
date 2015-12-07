@@ -115,10 +115,8 @@ public class MainActivity extends Activity {
         currentPictureIndex = 0;
         String dirName = Environment.getExternalStorageDirectory().getPath();
         File dir = new File(dirName);
-        if(currentPictureIndex == 0){
-            return;
-        }
         for (File f : dir.listFiles()) {
+            if(f == null){return;}
             if (f.toString().endsWith(".jpg")) pictures.add(f);
         }
     }
@@ -131,9 +129,7 @@ public class MainActivity extends Activity {
 
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
-        if(currentPictureIndex == 0){
-            return;
-        }
+        if(pictures == null){return;}
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
         updateShownIndex();
@@ -181,6 +177,7 @@ public class MainActivity extends Activity {
         DBHelper DBhelp = new DBHelper(this.getApplicationContext(),factory,dbHandler);
         SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
 
+        toastTest();
 
         openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
         openCVdb.execSQL("create table ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
@@ -225,7 +222,7 @@ public class MainActivity extends Activity {
 
     public void toastTest(){
         Context context = getApplicationContext();
-        CharSequence text = "";
+        CharSequence text = "Worked";
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
