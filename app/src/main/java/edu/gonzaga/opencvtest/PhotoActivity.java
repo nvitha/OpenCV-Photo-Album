@@ -34,6 +34,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class PhotoActivity extends Activity implements CvCameraViewListener2, OnTouchListener {
@@ -82,6 +83,20 @@ public class PhotoActivity extends Activity implements CvCameraViewListener2, On
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        //back button listener
+        final Activity _this = this;
+        Button backButton = (Button) findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Go back to main activity
+                Log.i(TAG, "Start main activity");
+                Intent intent = new Intent(_this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
@@ -190,15 +205,12 @@ public class PhotoActivity extends Activity implements CvCameraViewListener2, On
         Log.i(TAG,"onTouch event");
         //make the CameraView take a picture
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String currentDateandTime = sdf.format(new Date());
+        String currentDateTime = sdf.format(new Date());
         String fileName = Environment.getExternalStorageDirectory().getPath() +
-                "/picture_" + currentDateandTime + ".jpg";
+                "/picture_" + currentDateTime + ".jpg";
         mOpenCvCameraView.takePicture(fileName);
         Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
-        //Go back to main activity
-        Log.i(TAG, "Start main activity");
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
         return false;
     }
 }
