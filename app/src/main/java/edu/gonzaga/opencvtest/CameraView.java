@@ -37,6 +37,7 @@ public class CameraView extends JavaCameraView implements PictureCallback {
     private String mPictureFileName;
     private SQLiteDatabase.CursorFactory factory;
     private SQLiteDatabase openCVdb;
+    private String numString;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -111,17 +112,16 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
 
         //These are the key functions for color and shape data
-        String i;
         Cursor resultSet = openCVdb.rawQuery("select COUNT(*) FROM Photo;", null);
         if (resultSet == null) {
-            i = "1";
+            numString = "0";
         } else {
             resultSet.moveToFirst();
-            i = "" + (Integer.parseInt(resultSet.getString(1)) + 1);
+            numString = "" + (Integer.parseInt(resultSet.getString(1)));
         }
         String temp = "\"" + mPictureFileName.replaceAll("/","\\/") + "\"";
-        openCVdb.execSQL("insert into Photo values(" + i + ", " + temp +");");
-       // getStatistics(image);
+        openCVdb.execSQL("insert into Photo values(" + numString + ", " + temp +");");
+        getStatistics(image);
      //   edgeDetection(image);
      //   circleDetection(image);
 
@@ -165,18 +165,14 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         System.out.println("HSV Mean: " + Arrays.toString(PhotoMath.pixelMean(hsvPixels)));
         System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
 
+        numString = Integer.parseInt(numString) + "";
 
-
-        Cursor resultSet = openCVdb.rawQuery("select COUNT(*) FROM Photo;", null);
-        resultSet.moveToFirst();
-        String i = resultSet.getString(1);
-
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 1, " + PhotoMath.pixelMean(bgrPixels)[2] + ", " + PhotoMath.pixelStdev(bgrPixels)[2] + ");");
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 2, " + PhotoMath.pixelMean(bgrPixels)[1] + ", " + PhotoMath.pixelStdev(bgrPixels)[1] + ");");
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 3, " + PhotoMath.pixelMean(bgrPixels)[0] + ", " + PhotoMath.pixelStdev(bgrPixels)[0] + ");");
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 4, " + PhotoMath.pixelMean(hsvPixels)[0] + ", " + PhotoMath.pixelStdev(hsvPixels)[0] + ");");
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 5, " + PhotoMath.pixelMean(hsvPixels)[1] + ", " + PhotoMath.pixelStdev(hsvPixels)[1] + ");");
-        openCVdb.execSQL("insert into ColorStatistics values(" + i + ", 6, " + PhotoMath.pixelMean(hsvPixels)[2] + ", " + PhotoMath.pixelStdev(hsvPixels)[2] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 1, " + PhotoMath.pixelMean(bgrPixels)[2] + ", " + PhotoMath.pixelStdev(bgrPixels)[2] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 2, " + PhotoMath.pixelMean(bgrPixels)[1] + ", " + PhotoMath.pixelStdev(bgrPixels)[1] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 3, " + PhotoMath.pixelMean(bgrPixels)[0] + ", " + PhotoMath.pixelStdev(bgrPixels)[0] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 4, " + PhotoMath.pixelMean(hsvPixels)[0] + ", " + PhotoMath.pixelStdev(hsvPixels)[0] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 5, " + PhotoMath.pixelMean(hsvPixels)[1] + ", " + PhotoMath.pixelStdev(hsvPixels)[1] + ");");
+        openCVdb.execSQL("insert into ColorStatistics values(" + numString + ", 6, " + PhotoMath.pixelMean(hsvPixels)[2] + ", " + PhotoMath.pixelStdev(hsvPixels)[2] + ");");
 
 
 

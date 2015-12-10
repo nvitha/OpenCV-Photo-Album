@@ -95,10 +95,76 @@ public class MainActivity extends Activity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                System.out.println(pos);
                 //THIS IS WHERE YOU DECIDE WHAT QUERY TO EXECUTE
                 //Should execute the query associated with pos and change the pictures ArrayList appropriately
                 //Pictures should be populated with the results of the query, and currentIndex should reset to 1
+
+                // NEED to use adapterView to retrieve sort type...!!!! =.=
+                String dirName = Environment.getExternalStorageDirectory().getPath();
+                File dir = new File(dirName);
+
+                // RED
+                if(pos == 1){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 1 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // GREEN
+                else if(pos == 2){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 2 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    // ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // BLUE
+                else if(pos == 3){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 3 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    // ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // DEFAULT
+                else{
+                    // ???????????????? Default sort
+                }
+
+                currentPictureIndex = 1;
             }
 
             @Override
@@ -130,7 +196,7 @@ public class MainActivity extends Activity {
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
         if(pictures == null){return;}
-        if(currentPictureIndex == 0){return;}
+        if(pictures.size() == 0){return;}
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
         updateShownIndex();

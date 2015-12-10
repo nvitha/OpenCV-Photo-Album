@@ -24,7 +24,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "create table if not exists Photo(PhotoID int, FileLocation varchar(255));\n"
                         + "create table if not exists ColorScheme(ColorSchemeID int PRIMARY KEY,ColorSchemeName varchar(255));\n"
                         + "create table if not exists ColorSchemeComponent(ColorSchemeID int PRIMARY KEY, ColorSchemeComponentID int, ColorSchemeComponentName varchar(255));\n"
-                        + "create table if not exists ColorStatistics(PhotoID int PRIMARY KEY, ColorSchemeComponentID int, AverageValue REAL, STDEV REAL);\n"
+                        + "create table if not exists ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue REAL, STDEV REAL, UNIQUE(PhotoID,ColorSchemeComponentID));\n"
                         + "create table if not exists Shape(ShapeID int PRIMARY KEY, ShapeName varchar(255));"
                         + "create table if not exists PhotoShape(PhotoID int, ShapeID int, Loc1 int, Loc2 int, Unique(PhotoID,ShapeID,Loc1,Loc2));\n"
 
@@ -40,11 +40,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public void destroy(SQLiteDatabase db){
         db.execSQL(
                 "delete table if exists Photo;\n"
-                        + "delete table if exists ColorScheme;\n"
-                        + "delete table if exists ColorSchemeComponent;\n"
-                        + "delete table if exists ColorStatistics;\n"
-                        + "delete table if exists Shape;\n"
-                        + "delete table if exists PhotoShape;\n"
+                        + "drop table if exists ColorScheme;\n"
+                        + "drop table if exists ColorSchemeComponent;\n"
+                        + "drop table if exists ColorStatistics;\n"
+                        + "drop table if exists Shape;\n"
+                        + "drop table if exists PhotoShape;\n"
         );
     }
 
