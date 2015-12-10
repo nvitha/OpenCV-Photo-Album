@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
-    private SQLiteDatabase openCVdb;
+    public SQLiteDatabase openCVdb;
     //MainActivity instance = new MainActivity();
     //TODO: Pass images to pictures from SQL query
 

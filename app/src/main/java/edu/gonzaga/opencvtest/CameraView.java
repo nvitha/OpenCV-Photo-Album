@@ -37,7 +37,7 @@ public class CameraView extends JavaCameraView implements PictureCallback {
     private String mPictureFileName;
     private SQLiteDatabase.CursorFactory factory;
     private SQLiteDatabase openCVdb;
-    private String numString;
+    private String numString = "1";
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -112,15 +112,12 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         Mat image = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
 
         //These are the key functions for color and shape data
-        Cursor resultSet = openCVdb.rawQuery("select COUNT(*) FROM Photo;", null);
-        if (resultSet == null) {
-            numString = "0";
-        } else {
-            resultSet.moveToFirst();
-            numString = "" + (Integer.parseInt(resultSet.getString(1)));
-        }
+        //Cursor resultSet = openCVdb.rawQuery("select COUNT(*) FROM Photo;", null);
+
         String temp = "\"" + mPictureFileName.replaceAll("/","\\/") + "\"";
+        //System.out.println(numString + "  make searchable");
         openCVdb.execSQL("insert into Photo values(" + numString + ", " + temp +");");
+        numString = Integer.parseInt(numString)+1 + "";
         getStatistics(image);
      //   edgeDetection(image);
      //   circleDetection(image);
