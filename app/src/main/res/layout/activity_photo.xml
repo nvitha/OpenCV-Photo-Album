@@ -37,6 +37,18 @@ android:layout_height="match_parent" >
     android:visibility="gone"
     android:id="@+id/java_surface_view"
     opencv:show_fps="true"
-    opencv:camera_id="any" />
+    opencv:camera_id="any">
+
+
+
+    </edu.gonzaga.opencvtest.CameraView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BACK"
+        android:id="@+id/backButton"
+        android:layout_gravity="left|top" />
+
 
 </FrameLayout>
