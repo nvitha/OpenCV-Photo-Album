@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
-
+    private SQLiteDatabase openCVdb;
     //MainActivity instance = new MainActivity();
     //TODO: Pass images to pictures from SQL query
 
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-
+        initializeSQLiteDB();
 
         // populate images, set index to 0
         populatePicturesDefault();
@@ -95,10 +95,76 @@ public class MainActivity extends Activity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                System.out.println(pos);
                 //THIS IS WHERE YOU DECIDE WHAT QUERY TO EXECUTE
                 //Should execute the query associated with pos and change the pictures ArrayList appropriately
                 //Pictures should be populated with the results of the query, and currentIndex should reset to 1
+
+                // NEED to use adapterView to retrieve sort type...!!!! =.=
+                String dirName = Environment.getExternalStorageDirectory().getPath();
+                File dir = new File(dirName);
+
+                // RED
+                if(pos == 1){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 1 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // GREEN
+                else if(pos == 2){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 2 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    // ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // BLUE
+                else if(pos == 3){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 3 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+
+                    String picPath = resultSet.getString(0);
+                    for (File f : dir.listFiles()) {
+                        if(f == null){return;}
+                        if (f.toString() == picPath) pictures.add(f);
+                    }
+                    // ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        for (File f : dir.listFiles()) {
+                            if(f == null){return;}
+                            if (f.toString() == picPath) pictures.add(f);
+                        }
+                    }
+                }
+                // DEFAULT
+                else{
+                    // ???????????????? Default sort
+                }
+
+                currentPictureIndex = 1;
             }
 
             @Override
@@ -130,6 +196,7 @@ public class MainActivity extends Activity {
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
         if(pictures == null){return;}
+        if(pictures.size() == 0){return;}
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
         updateShownIndex();
@@ -175,17 +242,17 @@ public class MainActivity extends Activity {
             }
         };
         DBHelper DBhelp = new DBHelper(this.getApplicationContext(),factory,dbHandler);
-        SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
 
-        toastTest();
-
-        openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorStatistics(PhotoID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, AverageValue int NOT NULL, STDEV int NOT NULL, Check (AverageValue > 0 AND AverageValue < 361));");
-        openCVdb.execSQL("create table Shape(ShapeID int PRIMARY KEY NOT NULL, ShapeName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table PhotoShape(PhotoID int NOT NULL, ShapeID int NOT NULL, Loc1 varchar(255) NOT NULL, Loc2 varchar(255) NOT NULL);");
-        openCVdb.execSQL("create view SingleColorView AS\n" +
+        openCVdb = DBhelp.getWritableDatabase();
+        toastTest("Database Created or Loaded");
+/*      openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorStatistics(PhotoID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, AverageValue int NOT NULL, STDEV int NOT NULL, Check (AverageValue > 0 AND AverageValue < 361));");
+        openCVdb.execSQL("create table if not exists  Shape(ShapeID int PRIMARY KEY NOT NULL, ShapeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists PhotoShape(PhotoID int NOT NULL, ShapeID int NOT NULL, Loc1 varchar(255) NOT NULL, Loc2 varchar(255) NOT NULL);");
+*/
+/*    openCVdb.execSQL("create view SingleColorView AS\n" +
                 "(select PhotoID, ColorSchemeName, ColorSchemeComponentName, AverageValue, STDEV\n" +
                 "from ColorSchemeComponent \n" +
                 "natural join ColorScheme \n" +
@@ -213,16 +280,17 @@ public class MainActivity extends Activity {
                 "natural join PhotoShape\n" +
                 "group by PhotoID, ShapeID\n" +
                 "order by PhotoID);");
-
+*/
         // Execute create/insertion commands; Would be used for inserting statistics as well
-        openCVdb.execSQL("insert into ColorScheme values(1,RGB), (2,HSV);");
+ /*       openCVdb.execSQL("insert into ColorScheme values(1,RGB), (2,HSV);");
         openCVdb.execSQL("insert into ColorSchemeComponent values (1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation), (2,6,Value);");
         openCVdb.execSQL("insert into Shape values (1,Line), (2,Circle);");
+ */
     }
 
-    public void toastTest(){
+    public void toastTest(String string){
         Context context = getApplicationContext();
-        CharSequence text = "Worked";
+        CharSequence text = string;
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);

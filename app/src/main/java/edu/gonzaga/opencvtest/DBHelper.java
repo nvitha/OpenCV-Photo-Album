@@ -21,18 +21,34 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
-                "create table Photo(PhotoID int, FileLocation varchar(255));"
-                        + "create table ColorScheme(ColorSchemeID int,ColorSchemeName varchar(255));"
-                        + "create table ColorSchemeComponent(ColorSchemeID int, ColorSchemeComponentID int,ColorSchemeComponentName varchar(255));"
-                        + "create table ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
-                        + "create table Shape(ShapeID int, ShapeName varchar(255));"
-                        + "create table PhotoShape(PhotoID int, ShapeID int, Loc1 int, Loc2 int);"
-                        + "insert into ColorScheme Values(1,RGB), (2,HSV);"
-                        + "insert into ColorSchemeComponent Values(1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation),(2,6,Value);"
-                        + "insert into Shape Values(1,Line),(2,Circle);"
+                "create table if not exists Photo(PhotoID int, FileLocation varchar(255));\n"
+                        + "create table if not exists ColorScheme(ColorSchemeID int PRIMARY KEY,ColorSchemeName varchar(255));\n"
+                        + "create table if not exists ColorSchemeComponent(ColorSchemeID int PRIMARY KEY, ColorSchemeComponentID int, ColorSchemeComponentName varchar(255));\n"
+                        + "create table if not exists ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue REAL, STDEV REAL, UNIQUE(PhotoID,ColorSchemeComponentID));\n"
+                        + "create table if not exists Shape(ShapeID int PRIMARY KEY, ShapeName varchar(255));"
+                        + "create table if not exists PhotoShape(PhotoID int, ShapeID int, Loc1 int, Loc2 int, Unique(PhotoID,ShapeID,Loc1,Loc2));\n"
+
+                        + "insert or ignore into ColorScheme Values(1,RGB), (2,HSV);\n"
+                        + "insert or ignore into ColorSchemeComponent Values(1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation),(2,6,Value);\n"
+                        + "insert or ignore into Shape Values(1,Line),(2,Circle);\n"
         );
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //To be added if we add different versions
+    }
+
+    public void destroy(SQLiteDatabase db){
+        db.execSQL(
+                "delete table if exists Photo;\n"
+                        + "drop table if exists ColorScheme;\n"
+                        + "drop table if exists ColorSchemeComponent;\n"
+                        + "drop table if exists ColorStatistics;\n"
+                        + "drop table if exists Shape;\n"
+                        + "drop table if exists PhotoShape;\n"
+        );
+    }
+
+    public boolean exists(){
+        return true;
     }
 }
