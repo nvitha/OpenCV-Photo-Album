@@ -53,6 +53,8 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         };
         DBHelper DBhelp = new DBHelper(context,factory,dbHandler);
         openCVdb = DBhelp.getWritableDatabase();
+
+
     }
 
     public List<String> getEffectList() {
@@ -153,12 +155,23 @@ public class CameraView extends JavaCameraView implements PictureCallback {
         System.out.println("HSV Mean: " + Arrays.toString(PhotoMath.pixelMean(hsvPixels)));
         System.out.println("HSV STDEV: " + Arrays.toString(PhotoMath.pixelStdev(hsvPixels)));
 
+
+
+
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 1, " + PhotoMath.pixelMean(bgrPixels)[2] + ", " + PhotoMath.pixelStdev(bgrPixels)[2] + ");");
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 2, " + PhotoMath.pixelMean(bgrPixels)[1] + ", " + PhotoMath.pixelStdev(bgrPixels)[1] + ");");
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 3, " + PhotoMath.pixelMean(bgrPixels)[0] + ", " + PhotoMath.pixelStdev(bgrPixels)[0] + ");");
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 4, " + PhotoMath.pixelMean(hsvPixels)[0] + ", " + PhotoMath.pixelStdev(hsvPixels)[0] + ");");
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 5, " + PhotoMath.pixelMean(hsvPixels)[1] + ", " + PhotoMath.pixelStdev(hsvPixels)[1] + ");");
         openCVdb.execSQL("insert into ColorStatistics values(" + image + ", 6, " + PhotoMath.pixelMean(hsvPixels)[2] + ", " + PhotoMath.pixelStdev(hsvPixels)[2] + ");");
+
+
+
+
+
+
+
+
 
         System.out.println(hsvImage.rows() + " --- " + hsvImage.cols());
     }
