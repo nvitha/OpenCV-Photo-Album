@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
-
+    private SQLiteDatabase openCVdb;
     //MainActivity instance = new MainActivity();
     //TODO: Pass images to pictures from SQL query
 
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-
+        initializeSQLiteDB();
 
         // populate images, set index to 0
         populatePicturesDefault();
@@ -130,6 +130,7 @@ public class MainActivity extends Activity {
     public void setImageToCurrent() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
         if(pictures == null){return;}
+        if(currentPictureIndex == 0){return;}
         Bitmap bmp = BitmapFactory.decodeFile(pictures.get(currentPictureIndex).toString());
         img.setImageBitmap(bmp);
         updateShownIndex();
@@ -175,17 +176,17 @@ public class MainActivity extends Activity {
             }
         };
         DBHelper DBhelp = new DBHelper(this.getApplicationContext(),factory,dbHandler);
-        SQLiteDatabase openCVdb = DBhelp.getWritableDatabase();
 
-        toastTest();
-
-        openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table ColorStatistics(PhotoID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, AverageValue int NOT NULL, STDEV int NOT NULL, Check (AverageValue > 0 AND AverageValue < 361));");
-        openCVdb.execSQL("create table Shape(ShapeID int PRIMARY KEY NOT NULL, ShapeName varchar(255) NOT NULL);");
-        openCVdb.execSQL("create table PhotoShape(PhotoID int NOT NULL, ShapeID int NOT NULL, Loc1 varchar(255) NOT NULL, Loc2 varchar(255) NOT NULL);");
-        openCVdb.execSQL("create view SingleColorView AS\n" +
+        openCVdb = DBhelp.getWritableDatabase();
+        toastTest("Database Created or Loaded");
+/*      openCVdb.execSQL("create table if not exists Photo(PhotoID int PRIMARY KEY NOT NULL, FileLocation varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorScheme(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorSchemeComponent(ColorSchemeID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, ColorSchemeComponentName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists ColorStatistics(PhotoID int PRIMARY KEY NOT NULL, ColorSchemeComponentID int NOT NULL, AverageValue int NOT NULL, STDEV int NOT NULL, Check (AverageValue > 0 AND AverageValue < 361));");
+        openCVdb.execSQL("create table if not exists  Shape(ShapeID int PRIMARY KEY NOT NULL, ShapeName varchar(255) NOT NULL);");
+        openCVdb.execSQL("create table if not exists PhotoShape(PhotoID int NOT NULL, ShapeID int NOT NULL, Loc1 varchar(255) NOT NULL, Loc2 varchar(255) NOT NULL);");
+*/
+/*    openCVdb.execSQL("create view SingleColorView AS\n" +
                 "(select PhotoID, ColorSchemeName, ColorSchemeComponentName, AverageValue, STDEV\n" +
                 "from ColorSchemeComponent \n" +
                 "natural join ColorScheme \n" +
@@ -213,16 +214,17 @@ public class MainActivity extends Activity {
                 "natural join PhotoShape\n" +
                 "group by PhotoID, ShapeID\n" +
                 "order by PhotoID);");
-
+*/
         // Execute create/insertion commands; Would be used for inserting statistics as well
-        openCVdb.execSQL("insert into ColorScheme values(1,RGB), (2,HSV);");
+ /*       openCVdb.execSQL("insert into ColorScheme values(1,RGB), (2,HSV);");
         openCVdb.execSQL("insert into ColorSchemeComponent values (1,1,Red), (1,2,Green), (1,3,Blue), (2,4,Hue), (2,5,Saturation), (2,6,Value);");
         openCVdb.execSQL("insert into Shape values (1,Line), (2,Circle);");
+ */
     }
 
-    public void toastTest(){
+    public void toastTest(String string){
         Context context = getApplicationContext();
-        CharSequence text = "Worked";
+        CharSequence text = string;
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
