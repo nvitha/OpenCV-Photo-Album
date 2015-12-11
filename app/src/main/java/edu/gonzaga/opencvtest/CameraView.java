@@ -116,7 +116,8 @@ public class CameraView extends JavaCameraView implements PictureCallback {
 
         String temp = "\"" + mPictureFileName.replaceAll("/","\\/") + "\"";
         //System.out.println(numString + "  make searchable");
-        openCVdb.execSQL("insert into Photo values(" + numString + ", " + temp +");");
+        openCVdb.execSQL("insert into Photo (PhotoID, FileLocation) values(" + numString + ", " + temp +");");
+        System.out.println("INSERT STATEMENT :: " + "insert into Photo (PhotoID, FileLocation) values(" + numString + ", " + temp +");");
         numString = Integer.parseInt(numString)+1 + "";
         getStatistics(image);
      //   edgeDetection(image);

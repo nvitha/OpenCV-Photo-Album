@@ -105,13 +105,18 @@ public class MainActivity extends Activity {
 
                 // RED
                 if(pos == 1){
-                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 1 order by AverageValue desc;", null);
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from Photo", null);
                     resultSet.moveToFirst();
-
+                    //reinit pics
+//                    pictures = new ArrayList<>();
+                    pictures.clear();
                     String picPath = resultSet.getString(0);
                     for (File f : dir.listFiles()) {
                         if(f == null){return;}
-                        if (f.toString() == picPath) pictures.add(f);
+                        if (f.toString().equals(picPath) ){
+                            System.out.println(f);
+                            pictures.add(f);
+                        }
                     }
                     while(resultSet.moveToNext()){
                         picPath = resultSet.getString(0);
@@ -120,6 +125,8 @@ public class MainActivity extends Activity {
                             if (f.toString() == picPath) pictures.add(f);
                         }
                     }
+
+
                 }
                 // GREEN
                 else if(pos == 2){
@@ -129,7 +136,10 @@ public class MainActivity extends Activity {
                     String picPath = resultSet.getString(0);
                     for (File f : dir.listFiles()) {
                         if(f == null){return;}
-                        if (f.toString() == picPath) pictures.add(f);
+                        if (f.toString().equals(picPath) ){
+                            System.out.println(f);
+                            pictures.add(f);
+                        }
                     }
                     // ColorStatistics(PhotoID int, ColorSchemeComponentID int, AverageValue int, STDEV int, Check(AverageValue > 0 AND AverageValue < 361));"
                     while(resultSet.moveToNext()){
@@ -164,7 +174,8 @@ public class MainActivity extends Activity {
                     // ???????????????? Default sort
                 }
 
-                currentPictureIndex = 1;
+                currentPictureIndex = 0;
+                setImageToCurrent();
             }
 
             @Override
@@ -229,19 +240,22 @@ public class MainActivity extends Activity {
 
     // Create SQLLite database connection for executing SQL queries
     public void initializeSQLiteDB(){
-        SQLiteDatabase.CursorFactory factory = new CursorFactory() {
-            @Override
-            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable, SQLiteQuery query) {
-                return null;
-            }
-        };
+//        SQLiteDatabase.CursorFactory factory = new CursorFactory() {
+//            @Override
+//            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable, SQLiteQuery query) {
+//                System.out.println("Making a new cursor");
+//                Cursor out = new SQLiteCursor(editTable, query);
+////                Cursor out = new S
+//                return null;
+//            }
+//        };
         DatabaseErrorHandler dbHandler = new DatabaseErrorHandler() {
             @Override
             public void onCorruption(SQLiteDatabase dbObj) {
 
             }
         };
-        DBHelper DBhelp = new DBHelper(this.getApplicationContext(),factory,dbHandler);
+        DBHelper DBhelp = new DBHelper(this.getApplicationContext(),null,dbHandler);
 
         openCVdb = DBhelp.getWritableDatabase();
         toastTest("Database Created or Loaded");
