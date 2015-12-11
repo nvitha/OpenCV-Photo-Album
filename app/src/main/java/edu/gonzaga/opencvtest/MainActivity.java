@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     private ArrayList<File> pictures; //should be sorted
     private int currentPictureIndex;
     public SQLiteDatabase openCVdb;
+    public String test;
     //MainActivity instance = new MainActivity();
     //TODO: Pass images to pictures from SQL query
 
@@ -105,82 +106,69 @@ public class MainActivity extends Activity {
 
                 // RED
                 if(pos == 1){
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation, AverageValue from ColorStatistics natural join Photo where ColorSchemeComponentID = 1 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+                    //reinit pics
+//                    pictures = new ArrayList<>();
                     pictures.clear();
-                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 1 order by AverageValue asc", null);
-                    if(resultSet.moveToFirst()){
-                        String picPath = resultSet.getString(0);
-                        for (File f : dir.listFiles()) {
-                            if(f == null){return;}
-                            if (f.toString().equals(picPath)) pictures.add(f);
-                        }
-                        while(resultSet.moveToNext()){
-                            picPath = resultSet.getString(0);
-                            for (File f : dir.listFiles()) {
-                                if(f == null){return;}
-                                if (f.toString().equals(picPath)) pictures.add(f);
-                            }
-                        }
+                    String picPath = resultSet.getString(0);
+                    test = resultSet.getString(1);
+                    File f = new File(picPath); // new File(String);
+                    pictures.add(f);
+
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        test+=(" : "+resultSet.getString(1));
+                        f = new File(picPath); // new File(String);
+                        pictures.add(f);
                     }
-                    else
-                        System.out.println("Need to populate ColorStatistics or Photo table.");
                 }
                 // GREEN
                 else if(pos == 2){
-                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 2 order by AverageValue asc;", null);
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation, AverageValue from ColorStatistics natural join Photo where ColorSchemeComponentID = 2 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+                    //reinit pics
+//                    pictures = new ArrayList<>();
                     pictures.clear();
-                    if(resultSet.moveToFirst()){
-                        /*do{
-                            String picPath = resultSet.getString(0);
-                            for (File f : dir.listFiles()) {
-                                if(f == null){return;}
-                                if (f.toString().equals(picPath)) pictures.add(f);
-                            }
-                        }while(!resultSet.isAfterLast());*/
-                        String picPath = resultSet.getString(0);
-                        for (File f : dir.listFiles()) {
-                            if(f == null){return;}
-                            if (f.toString().equals(picPath)) pictures.add(f);
-                        }
-                        while(resultSet.moveToNext()){
-                            picPath = resultSet.getString(0);
-                            for (File f : dir.listFiles()) {
-                                if(f == null){return;}
-                                if (f.toString().equals(picPath)) pictures.add(f);
-                            }
-                        }
+                    String picPath = resultSet.getString(0);
+                    test = resultSet.getString(1);
+                    File f = new File(picPath); // new File(String);
+                    pictures.add(f);
+
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        test+=(" : "+resultSet.getString(1));
+                        f = new File(picPath); // new File(String);
+                        pictures.add(f);
                     }
-                    else
-                        System.out.println("Need to populate ColorStatistics or Photo table.");
+
                 }
                 // BLUE
                 else if(pos == 3){
-                    Cursor resultSet = openCVdb.rawQuery("select FileLocation from ColorStatistics natural join Photo where ColorSchemeComponentID = 3 order by AverageValue asc;", null);
+                    Cursor resultSet = openCVdb.rawQuery("select FileLocation, AverageValue from ColorStatistics natural join Photo where ColorSchemeComponentID = 3 order by AverageValue desc;", null);
+                    resultSet.moveToFirst();
+                    //reinit pics
+//                    pictures = new ArrayList<>();
                     pictures.clear();
-                    if(resultSet.moveToFirst()){
-                        String picPath = resultSet.getString(0);
-                        for (File f : dir.listFiles()) {
-                            if(f == null){return;}
-                            if (f.toString().equals(picPath)) pictures.add(f);
-                        }
-                        while(resultSet.moveToNext()){
-                            picPath = resultSet.getString(0);
-                            for (File f : dir.listFiles()) {
-                                if(f == null){return;}
-                                if (f.toString().equals(picPath)) pictures.add(f);
-                            }
-                        }
+                    String picPath = resultSet.getString(0);
+                    test = resultSet.getString(1);
+                    File f = new File(picPath); // new File(String);
+                    pictures.add(f);
+
+                    while(resultSet.moveToNext()){
+                        picPath = resultSet.getString(0);
+                        test+=(" : "+resultSet.getString(1));
+                        f = new File(picPath); // new File(String);
+                        pictures.add(f);
                     }
-                    else
-                        System.out.println("Need to populate ColorStatistics or Photo table.");
+
                 }
                 // DEFAULT
                 else{
-                    // ???????????????? Default sort
                 }
 
                 currentPictureIndex = 0;
                 setImageToCurrent();
-                toastTest("Re-Sorted Images");
             }
 
             @Override
@@ -198,8 +186,8 @@ public class MainActivity extends Activity {
         String dirName = Environment.getExternalStorageDirectory().getPath();
         File dir = new File(dirName);
         for (File f : dir.listFiles()) {
-            if(f == null){return;}
-            if (f.toString().endsWith(".jpg")) pictures.add(f);
+            if(f != null)
+                if (f.toString().endsWith(".jpg")) pictures.add(f);
         }
     }
 
@@ -222,11 +210,13 @@ public class MainActivity extends Activity {
         if (currentPictureIndex < pictures.size() - 1) currentPictureIndex++;
         System.out.println("Index: " + currentPictureIndex);
         setImageToCurrent();
+        toastTest(test.split(":")[currentPictureIndex]);
     }
 
     public void prevPhoto() {
         currentPictureIndex = Math.max(0, currentPictureIndex - 1);
         setImageToCurrent();
+        toastTest(test.split(":")[currentPictureIndex]);
     }
 
     @Override

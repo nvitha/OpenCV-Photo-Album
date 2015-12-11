@@ -30,11 +30,6 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("insert into ColorScheme (ColorSchemeID,ColorSchemeName) Values(1,'RGB'), (2,'HSV');");
         db.execSQL("insert into ColorSchemeComponent (ColorSchemeID, ColorSchemeComponentID, ColorSchemeComponentName) Values(1,1,'Red'), (1,2,'Green'), (1,3,'Blue'), (2,4,'Hue'), (2,5,'Saturation'),(2,6,'Value');");
         db.execSQL("insert into Shape (ShapeID, ShapeName) Values(1,'Line'),(2,'Circle');");
-
-        Cursor resultSet1 = db.rawQuery("select * from Shape", null);
-        if(resultSet1 == null) {
-            System.out.println("well, this sucks");
-        }
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop table if exists Photo");
